@@ -1,0 +1,7 @@
+totalSum := element valueForKeyPath:'parent.parent.parent.parent.reportData.object.total'.
+(totalSum == nil) ifTrue:
+[
+totalSum := 0.
+].
+
+((totalSum - (totalSum integerPart)) * 100) integerPart.

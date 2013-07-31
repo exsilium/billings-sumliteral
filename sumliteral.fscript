@@ -1,0 +1,135 @@
+"Billings value"
+totalSum := (element valueForKeyPath:'parent.parent.parent.parent.reportData.object.total') integerPart.
+(totalSum == nil) ifTrue:
+[
+totalSum := 0.
+].
+"For testing:"
+"totalSum := 525."
+"==========================================================================="
+" _____           __    _ _               _                                 "
+"|   __|_ _ _____|  |  |_| |_ ___ ___ ___| |                                "
+"|__   | | |     |  |__| |  _| -_|  _| .'| |                                "
+"|_____|___|_|_|_|_____|_|_| |___|_| |__,|_| v 0.0.1 (c) 2011 - 2013        "
+"==========================================================================="
+
+totalSumFormatter := NSNumberFormatter alloc init.
+totalSumFormatter setFormatterBehavior:NSNumberFormatterBehavior10_4.
+totalSumFormatter setMaximumFractionDigits:0.
+totalSumLit := (totalSumFormatter stringFromNumber:totalSum).
+
+"F-script to write out the invoice total"
+
+"Functional Blocks"
+"Modulo implementation, '4 mod 3' is called: mod value:4 value:3"
+mod := [:a :n| a - (n * ((a/n) integerPart))].
+
+ones := {'', 'One ', 
+             'Two ',
+             'Three ',
+             'Four ',
+             'Five ',
+             'Six ',
+             'Seven ',
+             'Eight ',
+             'Nine ',
+             'Ten ',
+             'Eleven ',
+             'Twelve ',
+             'Thirteen ',
+             'Fourteen ',
+             'Fifteen ',
+             'Sixteen ',
+             'Seventeen ',
+             'Eighteen ',
+             'Nineteen '}.
+
+tens := {'', '', 'Twenty',
+                 'Thirty',
+                 'Forty',
+                 'Fifty',
+                 'Sixty',
+                 'Seventy',
+                 'Eighty',
+                 'Ninety'}.
+
+lots := {' Zillion ',
+         ' Trillion ',
+         ' Billion ',
+         ' Million ',
+         ' Thousand ', ''}.
+         
+"totalSumLit is sum in literal form"
+
+[(mod value:(totalSumLit length) value:3) ~= 0] whileTrue:[
+	totalSumLit := '0' ++ totalSumLit.
+].
+
+lot := 5.
+endResult := ''.
+totalSumLit = '000' ifTrue:
+[
+   endResult := 'Zero'.
+]
+ifFalse:
+[
+   [(totalSumLit ~= '') & (lot >= 0)] whileTrue: [
+   
+      "We do the Copy() part here"
+      s := (totalSumLit at:((totalSumLit length) - 3)) ++ (totalSumLit at:((totalSumLit length) - 2)) ++ (totalSumLit at:((totalSumLit length) - 1)).
+      
+      "We do the Delete() part here with a while loop"
+      i := 0.
+      totalSumLitTemp := ''.
+      [i < ((totalSumLit length) - 3)] whileTrue:
+      [
+         totalSumLitTemp := totalSumLitTemp ++ (totalSumLit at:i).
+         i := i + 1.
+      ].
+      totalSumLit length <= 3 ifTrue:
+      [
+         totalSumLit := ''.
+      ].
+      totalSumLit := totalSumLitTemp.
+      
+      "============================================================================================"
+      
+      "Here we should compile the result"
+      result := ''.
+      
+      "Let's check for ones"
+      (s integerValue) <= 19 ifTrue:
+      [
+         result := ones at:(s integerValue).
+      ]
+      ifFalse:
+      [
+         vH := ''. vT := ''. vO := ''. Spc := ' '.
+         "Hundreds"
+         x := ((s integerValue) / 100) integerPart.
+         x > 0 ifTrue:
+         [
+            vH := (ones at:(x integerPart)) ++ 'Hundred '.
+         ].
+         x := mod value:(s integerValue) value:100.
+         "0..99"
+         (x / 10) <= 1 ifTrue:
+         [
+            result := vH ++ (ones at:(x integerPart)).
+         ]
+         ifFalse:
+         [
+            vT := tens at:((x / 10) integerPart).
+            x := mod value:x value:10.
+            "We comment this out: (vT ~= '') & (x > 0) ifTrue: [ Spc := '-'. ]."
+            vO := ones at:x.
+            result := vH ++ vT ++ Spc ++ vO.
+         ]
+      ].
+      
+      endResult := result ++ (lots at:lot) ++ endResult.
+      lot := lot - 1.
+   ]
+].
+
+endResult.
